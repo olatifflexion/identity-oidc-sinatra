@@ -44,6 +44,7 @@ GEM
       activesupport (>= 4.2)
       aes_key_wrap
       bindata
+    jwe (0.4.0)
     jwt (2.3.0)
     kwalify (0.7.2)
     method_source (1.0.0)
@@ -134,6 +135,7 @@ DEPENDENCIES
   fakefs
   faraday
   json-jwt (~> 1.11.0)
+  jwe
   jwt (~> 2.1)
   nokogiri (>= 1.11.0)
   pry-byebug
@@ -147,4 +149,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   2.3.13
+   2.3.17

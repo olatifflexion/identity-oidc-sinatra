@@ -45,6 +45,14 @@ module LoginGov
         @config.fetch('cache_oidc_config')
       end
 
+      def irs_attempt_api_path
+        @config.fetch('irs_attempt_api_path')
+      end
+
+      def irs_attempt_api_auth_tokens
+        @config.fetch('irs_attempt_api_auth_tokens')
+      end
+
       # @return [OpenSSL::PKey::RSA]
       def sp_private_key
         return @sp_private_key if @sp_private_key
@@ -82,6 +90,8 @@ module LoginGov
           end
         end
         data['sp_private_key'] = ENV['sp_private_key']
+        data['irs_attempt_api_path'] = ENV['irs_attempt_api_path']
+        data['irs_attempt_api_auth_tokens'] = ENV['irs_attempt_api_auth_tokens']
 
         data
       end

@@ -1,0 +1,10 @@
+<h1>Events</h1>
+<% if events.present? %>
+  <% events.each_with_index do |event, index| %>
+    <% event_type = event["events"].keys.first.split('/').last %>
+    <h3> <%= index + 1 %>: <%= event_type %> - <%= Time.at(event['iat']).to_datetime %></h3>
+    <textarea>
+      <%= JSON.pretty_generate(event) %>
+    </textarea>
+  <% end %>
+<% end %>

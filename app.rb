@@ -8,6 +8,7 @@ require 'faraday'
 require 'json'
 require 'json/jwt'
 require 'jwt'
+require 'jwe'
 require 'openssl'
 require 'securerandom'
 require 'sinatra/base'
@@ -136,6 +137,24 @@ module LoginGov::OidcSinatra
       end
     end
 
+    get '/events' do
+      decrypted_events =[]
+      irs_attempt_api_auth_token = config.irs_attempt_api_auth_tokens.split(',').last
+
+      conn = Faraday.new(
+        url: config.idp_url,
+        headers: {'Authorization' => "Bearer #{irs_attempt_api_auth_token}"}
+      )
+      response = conn.post(config.irs_attempt_api_path)
+      events = JSON.parse(response.body)
+      events && events['sets'].present? && events['sets'].each do |event|
+        decrypted_events << JSON.parse(JWE.decrypt(event[1], config.sp_private_key))
+      end
+
+      erb :events, locals: {
+        events: decrypted_events,
+      }
+    end
     private
 
     def authorization_url(ial:, aal: nil)
@@ -148,6 +167,7 @@ module LoginGov::OidcSinatra
         state: random_value,
         nonce: random_value,
         prompt: 'select_account',
+        irs_attempts_api_session_id: random_value,
       }.to_query
     end
 
@@ -261,6 +281,7 @@ module LoginGov::OidcSinatra
         id_token_hint: id_token,
         post_logout_redirect_uri: File.join(config.redirect_uri, 'logout'),
         state: SecureRandom.hex,
+        irs_attempts_api_session_id: random_value,
       }.to_query
     end
 

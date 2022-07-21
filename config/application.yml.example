@@ -5,3 +5,5 @@ redirect_uri: 'http://localhost:9292/'
 client_id: 'urn:gov:gsa:openidconnect:sp:sinatra'
 sp_private_key_path: 'config/demo_sp.key'
 cache_oidc_config: true
+irs_attempt_api_path: '/api/irs_attempts_api/security_events'
+irs_attempt_api_auth_tokens: 'test-token-1,test-token-2'
