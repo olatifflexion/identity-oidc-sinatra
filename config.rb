@@ -61,6 +61,14 @@ module LoginGov
         @sp_private_key = OpenSSL::PKey::RSA.new(key)
       end
 
+      # @return [OpenSSL::PKey::RSA]
+      def sp_attempts_private_key
+        return @sp_attempts_private_key if @sp_attempts_private_key
+
+        key = ENV['irs_private_key'] || get_sp_private_key_raw(@config.fetch('irs_private_key_path'))
+        @sp_attempts_private_key = OpenSSL::PKey::RSA.new(key)
+      end
+
       # Define the default configuration values. If application.yml exists, those
       # values will be merged in overriding defaults.
       #
@@ -72,6 +80,7 @@ module LoginGov
           'client_id'    => ENV['client_id']    || 'urn:gov:gsa:openidconnect:sp:sinatra',
           'redirect_uri' => ENV['redirect_uri'] || 'http://localhost:9292/',
           'sp_private_key_path' => ENV['sp_private_key_path'] || './config/demo_sp.key',
+          'irs_private_key_path' => ENV['irs_private_key_path'] || './config/irs_pk.key',
           'redact_ssn'   => true,
           'cache_oidc_config' => true,
         }

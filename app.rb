@@ -148,7 +148,7 @@ module LoginGov::OidcSinatra
       response = conn.post(config.irs_attempt_api_path)
       events = JSON.parse(response.body)
       events && events['sets'].present? && events['sets'].each do |event|
-        decrypted_events << JSON.parse(JWE.decrypt(event[1], config.sp_private_key))
+        decrypted_events << JSON.parse(JWE.decrypt(event[1], config.sp_attempts_private_key))
       end
 
       erb :events, locals: {

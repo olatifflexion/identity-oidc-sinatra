@@ -1,10 +1,21 @@
 <h1>Events</h1>
-<% if events.present? %>
-  <% events.each_with_index do |event, index| %>
-    <% event_type = event["events"].keys.first.split('/').last %>
-    <h3> <%= index + 1 %>: <%= event_type %> - <%= Time.at(event['iat']).to_datetime %></h3>
-    <textarea>
-      <%= JSON.pretty_generate(event) %>
-    </textarea>
+<table style="font-family: arial, sans-serif;border-collapse: collapse;width: 100%;">
+  <tr>
+    <th>#</th>
+    <th>Event Name</th>
+    <th>Event Date</th>
+    <th>Event Data</th>
+  </tr>
+  <% if events.present? %>
+    <% events.each_with_index do |event, index| %>
+      <tr>
+        <td> <%= index + 1 %> </td>
+        <td title="<%= JSON.pretty_generate(event) %>"> <%= event["events"].keys.first.split('/').last %> </td>
+        <td> <%= Time.at(event['iat']).to_datetime %> </td>
+        <td>
+          <textarea><%= JSON.pretty_generate(event) %></textarea>
+        </td>
+      </tr>
+    <% end %>
   <% end %>
-<% end %>
+</table>
