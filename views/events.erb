@@ -10,10 +10,10 @@
     <% events.each_with_index do |event, index| %>
       <tr>
         <td> <%= index + 1 %> </td>
-        <td title="<%= JSON.pretty_generate(event) %>"> <%= event["events"].keys.first.split('/').last %> </td>
-        <td> <%= Time.at(event['iat']).to_datetime %> </td>
+        <td title="<%= event[:description] %>"> <%= event[:title] %> </td>
+        <td> <%= event[:date] %> </td>
         <td>
-          <textarea><%= JSON.pretty_generate(event) %></textarea>
+          <textarea><%= event[:description] %></textarea>
         </td>
       </tr>
     <% end %>

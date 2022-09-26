@@ -143,19 +143,52 @@ module LoginGov::OidcSinatra
 
       conn = Faraday.new(
         url: config.idp_url,
-        headers: {'Authorization' => "Bearer #{irs_attempt_api_auth_token}"}
+        headers: {'Authorization' => "Bearer Login.gov #{irs_attempt_api_auth_token}"}
       )
-      response = conn.post(config.irs_attempt_api_path)
-      events = JSON.parse(response.body)
-      events && events['sets'].present? && events['sets'].each do |event|
-        decrypted_events << JSON.parse(JWE.decrypt(event[1], config.sp_attempts_private_key))
+      body = "timestamp=#{Time.now.iso8601}"
+      resp = conn.post(config.irs_attempt_api_path, body)
+      encrypted_data = Base64.strict_decode64(resp.body)
+      iv = Base64.strict_decode64(resp.headers['x-payload-iv'])
+      encrypted_key = Base64.strict_decode64(resp.headers['x-payload-key'])
+      private_key = OpenSSL::PKey::RSA.new(config.sp_attempts_private_key)
+      key = private_key.private_decrypt(encrypted_key)
+      decrypted = decrypt_attempts_response(
+        encrypted_data: encrypted_data, key: key, iv: iv,
+        )
+      events = JSON.parse(decrypted)
+      events && events.each do |_jti, jwes|
+        jwes.each do |_key_id, jwe|
+          begin
+            decrypted_events << JSON.parse(JWE.decrypt(jwe, config.sp_attempts_private_key))
+          rescue
+            puts 'Failed to parse/decrypt event!'
+          end
+        end
+      end
+      dec_events = []
+      decrypted_events && decrypted_events.each do |event|
+        dec_events << {
+          date: Time.at(event['iat']).to_datetime,
+          description: JSON.pretty_generate(event),
+          title: event["events"].keys.first.split('/').last,
+        }
       end
 
       erb :events, locals: {
-        events: decrypted_events,
+        events: dec_events.sort_by { |k| k["title"] },
       }
     end
     private
+
+    def decrypt_attempts_response(encrypted_data:,key:, iv:)
+      cipher = OpenSSL::Cipher.new('aes-128-cbc')
+      cipher.decrypt
+      cipher.key = key
+      cipher.iv = iv
+      decrypted = cipher.update(encrypted_data) + cipher.final
+
+      Zlib.gunzip(decrypted)
+    end
 
     def authorization_url(ial:, aal: nil)
       openid_configuration[:authorization_endpoint] + '?' + {
