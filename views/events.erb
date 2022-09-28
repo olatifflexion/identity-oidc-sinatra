@@ -1,0 +1,21 @@
+<h1>Events</h1>
+<table style="font-family: arial, sans-serif;border-collapse: collapse;width: 100%;">
+  <tr>
+    <th>#</th>
+    <th>Event Name</th>
+    <th>Event Date</th>
+    <th>Event Data</th>
+  </tr>
+  <% if events.present? %>
+    <% events.each_with_index do |event, index| %>
+      <tr>
+        <td> <%= index + 1 %> </td>
+        <td title="<%= event[:description] %>"> <%= event[:title] %> </td>
+        <td> <%= event[:date] %> </td>
+        <td>
+          <textarea><%= event[:description] %></textarea>
+        </td>
+      </tr>
+    <% end %>
+  <% end %>
+</table>
